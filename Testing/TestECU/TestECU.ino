@@ -4,7 +4,7 @@
 ECU ecu;
 
 void setup() {
-    ecu = ECU(8, 9);
+    ecu = ECU(Serial1);
     Serial.begin(9600);
 }
 
