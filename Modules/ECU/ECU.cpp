@@ -12,7 +12,7 @@ ECU::ECU(uint8_t softSerialRX, uint8_t softSerialTX) {
     ecuSerial = softSerial;
 }
 
-ECU::ECU(HardwareSerial hardwareSerial) {
+ECU::ECU(HardwareSerial &hardwareSerial) {
     ecuSerial = &hardwareSerial;
     hardwareSerial.begin(9600);
 }

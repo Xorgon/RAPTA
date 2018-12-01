@@ -18,7 +18,7 @@ public:
 
     ECU(uint8_t softSerialRX, uint8_t softSerialTX);
 
-    ECU(HardwareSerial hardwareSerial);
+    ECU(HardwareSerial &hardwareSerial);
 
     String readCurrentValues();
 
