@@ -20,12 +20,15 @@ public:
 
     ECU(HardwareSerial &hardwareSerial);
 
+	void sendCommand(char *cmd);
+	
     String readCurrentValues();
 
+	String readResponse(HardwareSerial &debugSerial);
+	
 private:
     Stream *ecuSerial;
 
-    void sendCommand(char *cmd);
     String readResponse();
 };
 
