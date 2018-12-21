@@ -24,9 +24,9 @@ String ECU::readCurrentValues() {
 
 void ECU::sendCommand(char *cmd) {
     ecuSerial->write(SYNC);
-	ecuSerial->write(SEPARATOR);
+    ecuSerial->write(SEPARATOR);
     ecuSerial->write(cmd);
-	ecuSerial->write(SEPARATOR);
+    ecuSerial->write(SEPARATOR);
     ecuSerial->write(CR);
 }
 
@@ -34,6 +34,10 @@ String ECU::readResponse() {
     char response[MAX_RESPONSE_LENGTH];
     uint16_t response_char_count = 0;
     bool synced = false;
+
+    if (!ecuSerial->available()) {
+        return F("Serial not available.");
+    }
 
     while (!synced) {
         if (ecuSerial->read() == SYNC) {
@@ -67,16 +71,16 @@ String ECU::readResponse(HardwareSerial &debugSerial) {
     uint16_t response_char_count = 0;
     bool synced = false;
 
-	while (!ecuSerial->available()) {
-		debugSerial.println("ecuSerial is not yet available...");
-	}
-	
-    while (!synced ) {
-		char received = ecuSerial->read();
-		debugSerial.println("Awaiting sync byte (got '" + String(uint8_t(received)) + "')");
+    while (!ecuSerial->available()) {
+        debugSerial.println("ecuSerial is not yet available...");
+    }
+
+    while (!synced) {
+        char received = ecuSerial->read();
+        debugSerial.println("Awaiting sync byte (got '" + String(uint8_t(received)) + "')");
         if (received == SYNC) {
             synced = true;
-			debugSerial.println("Received sync byte...");
+            debugSerial.println("Received sync byte...");
         }
     }
 
@@ -85,7 +89,7 @@ String ECU::readResponse(HardwareSerial &debugSerial) {
     }
 
     while (ecuSerial->available()) {
-		debugSerial.println("Receiving...");
+        debugSerial.println("Receiving...");
         byte c = ecuSerial->read();
         if (c != SEPARATOR) {
             response[response_char_count] = (char) c;
