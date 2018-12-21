@@ -26,6 +26,9 @@ public:
 
     float get_airspeed();
 
+    float get_altitude();
+
+    int8_t get_battery_pcnt();
 private:
     mavlink_vfr_hud_t vfr_hud_data;
     mavlink_sys_status_t sys_status;

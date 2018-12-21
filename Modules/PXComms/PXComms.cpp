@@ -137,3 +137,11 @@ void PXComms::receive_data() {
 float PXComms::get_airspeed() {
     return this->vfr_hud_data.airspeed;
 }
+
+float PXComms::get_altitude() {
+    return this->vfr_hud_data.alt;
+}
+
+float PXComms::get_battery_pcnt() {
+    return this->sys_status.battery_remaining;
+}
