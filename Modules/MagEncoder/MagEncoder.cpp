@@ -17,6 +17,23 @@ MagEncoder::MagEncoder(uint8_t chipSelect, uint8_t clock, uint8_t data) {
 
     digitalWrite(clock, HIGH);
     digitalWrite(chipSelect, HIGH);
+
+    resetOffset();
+}
+
+
+MagEncoder::MagEncoder(uint8_t chipSelect, uint8_t clock, uint8_t data, float offset) {
+    this->chipSelect = chipSelect;
+    this->clock = clock;
+    this->data = data;
+    this->offset = offset;
+
+    pinMode(chipSelect, OUTPUT);
+    pinMode(clock, OUTPUT);
+    pinMode(data, INPUT);
+
+    digitalWrite(clock, HIGH);
+    digitalWrite(chipSelect, HIGH);
 }
 
 unsigned int MagEncoder::getRawData() {
@@ -38,4 +55,17 @@ unsigned int MagEncoder::getRawData() {
 
     digitalWrite(chipSelect, HIGH);
     return dataOut;
+}
+
+float MagEncoder::getAngle() {
+    return 360.0 * getRawData() / 1024.0 - offset - 180.0;
+}
+
+void MagEncoder::resetOffset() {
+    uint8_t n = 8;
+    float sum = 0;
+    for (int i = 0; i < n; i++) {
+        sum += getRawData() / 1024.0;
+    }
+    offset = 360 * sum / n;
 }

@@ -10,5 +10,5 @@ void setup() {
 
 
 void loop() {
-    Serial.println(magEncoder.getRawData());
+    Serial.println(magEncoder.getAngle());
 }

@@ -14,13 +14,21 @@ public:
 
     MagEncoder(uint8_t chipSelect, uint8_t clock, uint8_t data);
 
+    MagEncoder(uint8_t chipSelect, uint8_t clock, uint8_t data, float offset);
+
     unsigned int getRawData();
+
+    float getAngle();
+
+    void resetOffset();
+
+protected:
+    float offset;
 
 private:
     uint8_t chipSelect;
     uint8_t clock;
     uint8_t data;
-
 };
 
 #endif //RAPTA_MAGENCODER_H
