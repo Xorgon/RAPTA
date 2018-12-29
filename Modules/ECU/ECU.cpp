@@ -17,9 +17,37 @@ ECU::ECU(HardwareSerial &hardwareSerial) {
     hardwareSerial.begin(9600);
 }
 
-String ECU::readCurrentValues() {
-    sendCommand("RCV");
-    return readResponse();
+void ECU::updateData() {
+    char cmd[] = "RCV";
+    sendCommand(cmd);
+    delay(50);  // TODO: Make a better system that doesn't rely on these delays.
+    readCurrentValues();
+}
+
+void ECU::updateStatus() {
+    status = getData("RSD");
+}
+
+void ECU::updateAll() {
+    updateData();
+    updateStatus();
+}
+
+bool ECU::checkCmdMatch(char *cmd, ecu_response_t resp) {
+    return (resp.cmd[0] != cmd[0] or resp.cmd[1] != cmd[1] or resp.cmd[2] != cmd[2]);
+}
+
+String ECU::getData(char cmd[3]) {
+    sendCommand(cmd);
+    delay(50);
+    ecu_response_t resp = readMessage();
+    if (checkCmdMatch(cmd, resp)) {
+        return "RECEIVED WRONG COMMAND";
+    } else if (!resp.valid) {
+        return "INVALID RESPONSE";
+    } else {
+        return String(resp.response);
+    }
 }
 
 void ECU::sendCommand(char *cmd) {
@@ -30,78 +58,72 @@ void ECU::sendCommand(char *cmd) {
     ecuSerial->write(CR);
 }
 
-String ECU::readResponse() {
-    char response[MAX_RESPONSE_LENGTH];
-    uint16_t response_char_count = 0;
+ecu_response_t ECU::readMessage() {
+    ecu_response_t response;
+    response.valid = false;
+
+    // Read command return message
     bool synced = false;
-
-    if (!ecuSerial->available()) {
-        return F("Serial not available.");
-    }
-
-    while (!synced) {
-        if (ecuSerial->read() == SYNC) {
-            synced = true;
-        }
-    }
-
-    if (ecuSerial->read() != SEPARATOR) {
-        return F("Response missing separator.");
-    }
-
-    while (ecuSerial->available()) {
-        byte c = ecuSerial->read();
-        if (c != SEPARATOR) {
-            response[response_char_count] = (char) c;
-            response_char_count++;
-        } else {
-            break;
-        }
-    }
-
-    if (ecuSerial->read() != CR) {
-        return F("Did not receive CR.");
-    }
-
-    return String(response);
-}
-
-String ECU::readResponse(HardwareSerial &debugSerial) {
-    char response[MAX_RESPONSE_LENGTH];
-    uint16_t response_char_count = 0;
-    bool synced = false;
-
-    while (!ecuSerial->available()) {
-        debugSerial.println("ecuSerial is not yet available...");
-    }
-
-    while (!synced) {
+    while (!synced and ecuSerial->available()) {
         char received = ecuSerial->read();
-        debugSerial.println("Awaiting sync byte (got '" + String(uint8_t(received)) + "')");
         if (received == SYNC) {
             synced = true;
-            debugSerial.println("Received sync byte...");
+            response.valid = true;
         }
     }
+    if (ecuSerial->read() != SEPARATOR) { response.valid = false; }
 
-    if (ecuSerial->read() != SEPARATOR) {
-        return F("Response missing separator.");
+    for (int i = 0; i < 3; i++) {
+        response.cmd[i] = ecuSerial->read();
     }
 
-    while (ecuSerial->available()) {
-        debugSerial.println("Receiving...");
-        byte c = ecuSerial->read();
-        if (c != SEPARATOR) {
-            response[response_char_count] = (char) c;
-            response_char_count++;
-        } else {
-            break;
+    if (ecuSerial->read() != SEPARATOR) { response.valid = false; }
+    if (ecuSerial->read() != CR) { response.valid = false; }
+
+    // Read data message
+    if (char(ecuSerial->read()) != SYNC) { response.valid = false; }
+    if (ecuSerial->read() != SEPARATOR) { response.valid = false; }
+
+    uint8_t charsRead = 0;
+    char received = ecuSerial->read();
+    while (received != CR and ecuSerial->available()) {
+        response.response[charsRead] = received;
+        charsRead++;
+        received = ecuSerial->read();
+    }
+    response.response[charsRead] = '\0';
+    return response;
+}
+
+void ECU::readCurrentValues() {
+    ecu_response_t response;
+    response.valid = false;
+
+    // Read command return message
+    bool synced = false;
+    while (!synced and ecuSerial->available()) {
+        char received = ecuSerial->read();
+        if (received == SYNC) {
+            synced = true;
+            response.valid = true;
         }
     }
+    if (ecuSerial->read() != SEPARATOR) { response.valid = false; }
 
-    if (ecuSerial->read() != CR) {
-        return F("Did not receive CR.");
+    for (int i = 0; i < 3; i++) {
+        response.cmd[i] = ecuSerial->read();
     }
 
-    return String(response);
+    if (ecuSerial->read() != SEPARATOR) { response.valid = false; }
+    if (ecuSerial->read() != CR) { response.valid = false; }
+
+    // Read data message
+    if (char(ecuSerial->read()) != SYNC) { response.valid = false; }
+    if (ecuSerial->read() != SEPARATOR) { response.valid = false; }
+
+    data.rpm = ecuSerial->parseInt();
+    data.egt = ecuSerial->parseInt();
+    data.pumpPower = ecuSerial->parseFloat();
+    data.batVoltage = ecuSerial->parseFloat();
+    data.throttlePct = ecuSerial->parseInt();
 }
