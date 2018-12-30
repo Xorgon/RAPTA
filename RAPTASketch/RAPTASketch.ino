@@ -21,6 +21,7 @@ void setup() {
 void loop() {
     float angle = aoaSensor.getAngle();
     ecu.updateAll();
+    pixhawk.receive_data();
 
     sprintf(output, "%s, %s, %lu",
             String(pixhawk.get_airspeed()).c_str(),
@@ -28,8 +29,4 @@ void loop() {
             ecu.data.rpm
     );
     Serial.println(output);
-}
-
-void serialEvent2() {
-    pixhawk.receive_data();
 }
