@@ -22,11 +22,17 @@ void loop() {
     float angle = aoaSensor.getAngle();
     ecu.updateAll();
     pixhawk.receive_data();
-
-    sprintf(output, "%s, %s, %lu",
+    sprintf(output, "%lu,%s,%s,%lu,%u,%s,%s,%u,%s,%s",
+            millis(),
             String(pixhawk.get_airspeed()).c_str(),
             String(pixhawk.get_altitude()).c_str(),
-            ecu.data.rpm
+            ecu.data.rpm,
+            ecu.data.egt,
+            String(ecu.data.pumpPower).c_str(),
+            String(ecu.data.batVoltage).c_str(),
+            ecu.data.throttlePct,
+            String(angle).c_str(),
+            ecu.status.c_str()
     );
     Serial.println(output);
 }
