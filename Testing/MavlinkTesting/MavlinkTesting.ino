@@ -2,33 +2,26 @@
 #include "PXComms.h"
 
 // Mavlink variables
-unsigned long previousMillisMAVLink = 0;     // will store last time MAVLink was transmitted and listened
-unsigned long next_interval_MAVLink = 1000;  // next interval to count
-const int num_hbs = 60;                      // # of heartbeats to wait before activating STREAMS from Pixhawk. 60 = one minute.
-int num_hbs_sent = num_hbs;
 PXComms px_comms;
 
+char output[500];
+
 void setup() {
-    px_comms = PXComms(Serial1);
-    Serial.begin(57600);
+    px_comms = PXComms(Serial2);
+    Serial.begin(9600);
     Serial.println("MAVLink starting.");
+    px_comms.send_data_request();
 }
 
 void loop() {
-    unsigned long currentMillisMAVLink = millis();
+    delay(100);
+    sprintf(output, "%s, %s",
+            String(px_comms.get_airspeed()).c_str(),
+            String(px_comms.get_altitude()).c_str()
+    );
+    Serial.println(output);
+}
 
-    if (currentMillisMAVLink - previousMillisMAVLink >= next_interval_MAVLink) {
-        previousMillisMAVLink = currentMillisMAVLink;
-        px_comms.send_heartbeat();
-        num_hbs_sent++;
-        if (num_hbs_sent >= num_hbs) {
-            // Request streams from Pixhawk
-            px_comms.send_data_request();
-            num_hbs_sent = 0;
-        }
-
-    }
-
+void serialEvent2() {
     px_comms.receive_data();
-    Serial.println(px_comms.get_airspeed());
 }

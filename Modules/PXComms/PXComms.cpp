@@ -10,12 +10,21 @@ PXComms::PXComms() {}
 PXComms::PXComms(HardwareSerial &hardware_serial) {
     px_serial = &hardware_serial;
     hardware_serial.begin(57600);
+    initialize_counters();
 }
 
 PXComms::PXComms(uint8_t soft_serial_rx, uint8_t soft_serial_tx) {
     AltSoftSerial *soft_serial = new AltSoftSerial(soft_serial_rx, soft_serial_tx);
     soft_serial->begin(57600);
     px_serial = soft_serial;
+    initialize_counters();
+}
+
+void PXComms::initialize_counters() {
+    previousMillisMAVLink = 0;     // will store last time MAVLink was transmitted and listened
+    next_interval_MAVLink = 1000;  // next interval to count
+    num_hbs = 60;                      // # of heartbeats to wait before activating STREAMS from Pixhawk. 60 = one minute.
+    num_hbs_sent = num_hbs;
 }
 
 void PXComms::send_heartbeat() {
@@ -42,7 +51,7 @@ void PXComms::send_data_request() {
 // To be setup according to the needed information to be requested from the Pixhawk
     const int maxStreams = 1;
     const uint8_t MAVStreams[maxStreams] = {MAV_DATA_STREAM_EXTENDED_STATUS};
-    const uint16_t MAVRates[maxStreams] = {0x11};
+    const uint16_t MAVRates[maxStreams] = {0x01};
 
     for (int i = 0; i < maxStreams; i++) {
         /*
@@ -134,6 +143,24 @@ void PXComms::receive_data() {
     }
 }
 
+void PXComms::update_data() {
+    unsigned long currentMillisMAVLink = millis();
+
+    if (currentMillisMAVLink - previousMillisMAVLink >= next_interval_MAVLink) {
+        previousMillisMAVLink = currentMillisMAVLink;
+        send_heartbeat();
+        num_hbs_sent++;
+        if (num_hbs_sent >= num_hbs) {
+            // Request streams from Pixhawk
+            send_data_request();
+            num_hbs_sent = 0;
+        }
+    }
+    while (px_serial->available()) {
+        receive_data();
+    }
+}
+
 float PXComms::get_airspeed() {
     return this->vfr_hud_data.airspeed;
 }
@@ -142,6 +169,6 @@ float PXComms::get_altitude() {
     return this->vfr_hud_data.alt;
 }
 
-float PXComms::get_battery_pcnt() {
+int8_t PXComms::get_battery_pcnt() {
     return this->sys_status.battery_remaining;
 }

@@ -24,17 +24,27 @@ public:
 
     void receive_data();
 
+    void update_data();
+
     float get_airspeed();
 
     float get_altitude();
 
     int8_t get_battery_pcnt();
+
 private:
+    void initialize_counters();
+
     mavlink_vfr_hud_t vfr_hud_data;
     mavlink_sys_status_t sys_status;
     mavlink_message_t msg;
     uint8_t buf[MAVLINK_MAX_PACKET_LEN];
     Stream *px_serial;
+
+    unsigned long previousMillisMAVLink;     // will store last time MAVLink was transmitted and listened
+    unsigned long next_interval_MAVLink;  // next interval to count
+    int num_hbs;                      // # of heartbeats to wait before activating STREAMS from Pixhawk. 60 = one minute.
+    int num_hbs_sent;
 };
 
 
