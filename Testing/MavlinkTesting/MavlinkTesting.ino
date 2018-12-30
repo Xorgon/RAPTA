@@ -14,7 +14,7 @@ void setup() {
 }
 
 void loop() {
-    delay(100);
+    px_comms.update_data();
     sprintf(output, "%s, %s",
             String(px_comms.get_airspeed()).c_str(),
             String(px_comms.get_altitude()).c_str()
@@ -23,5 +23,5 @@ void loop() {
 }
 
 void serialEvent2() {
-    px_comms.receive_data();
+
 }
