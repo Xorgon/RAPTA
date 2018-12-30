@@ -41,7 +41,7 @@
 .idea/tasks.xml
 
 # Miscellaneous IDE stuff.
-.idea/Quadcopter-Project.iml
+.idea/RAPTA.iml
 .idea/misc.xml
 .idea/misc.xml
 .idea/modules.xml
@@ -90,3 +90,4 @@ cmake-build-debug/*
 # Arduino libraries to be excluded
 libraries/SD/*
 libraries/MemoryFree/*
+*/__pycache__/*
