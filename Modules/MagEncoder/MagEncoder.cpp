@@ -1,7 +1,3 @@
-//
-// TODO: Zero the value on initialization and read as degrees from zero (+/-).
-//
-
 #include "MagEncoder.h"
 
 MagEncoder::MagEncoder() {}
