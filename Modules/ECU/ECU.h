@@ -9,12 +9,13 @@
 #define SEPARATOR char(0x2C)
 #define CR char(0x0D)
 #define MAX_RESPONSE_LENGTH 100
+#define CMD_DELAY 50
 
 #include <AltSoftSerial.h>
 
 typedef struct __ecu_response_t {
     bool valid;
-    char cmd[3];
+    char cmd[4];
     char response[MAX_RESPONSE_LENGTH];
 } ecu_response_t;
 
@@ -38,24 +39,37 @@ public:
 
     void sendCommand(char *cmd);
 
+    /**
+     * Updates engine data. Relies on delays so use for testing only.
+     */
     void updateData();
 
+    /**
+     * Updates engine status. Relies on delays so use for testing only.
+     */
     void updateStatus();
 
+    /**
+     * Updates engine data and status. Use this for most applications.
+     */
     void updateAll();
 
-    ecu_response_t readMessage();
+    void receiveResponse(ecu_response_t *response);
 
     eng_data_t data;
 
     String status;
+
 private:
-
-    bool checkCmdMatch(char cmd[3], ecu_response_t resp);
-
-    void readCurrentValues();
-
     Stream *ecuSerial;
+    unsigned long last_cmd_millis;
+    char *last_cmd;
+
+    void readHeader(ecu_response_t *response);
+
+    void readCurrentValues(ecu_response_t *response);
+
+    void readMessage(ecu_response_t *response);
 };
 
 #endif //RAPTA_ECU_H
