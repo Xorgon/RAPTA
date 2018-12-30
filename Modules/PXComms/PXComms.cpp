@@ -9,13 +9,13 @@ PXComms::PXComms() {}
 
 PXComms::PXComms(HardwareSerial &hardware_serial) {
     px_serial = &hardware_serial;
-    hardware_serial.begin(57600);
+    hardware_serial.begin(115200);
     initialize_counters();
 }
 
 PXComms::PXComms(uint8_t soft_serial_rx, uint8_t soft_serial_tx) {
     AltSoftSerial *soft_serial = new AltSoftSerial(soft_serial_rx, soft_serial_tx);
-    soft_serial->begin(57600);
+    soft_serial->begin(115200);
     px_serial = soft_serial;
     initialize_counters();
 }
@@ -51,7 +51,7 @@ void PXComms::send_data_request() {
 // To be setup according to the needed information to be requested from the Pixhawk
     const int maxStreams = 1;
     const uint8_t MAVStreams[maxStreams] = {MAV_DATA_STREAM_EXTENDED_STATUS};
-    const uint16_t MAVRates[maxStreams] = {0x01};
+    const uint16_t MAVRates[maxStreams] = {0x02};
 
     for (int i = 0; i < maxStreams; i++) {
         /*
@@ -145,7 +145,6 @@ void PXComms::receive_data() {
 
 void PXComms::update_data() {
     unsigned long currentMillisMAVLink = millis();
-
     if (currentMillisMAVLink - previousMillisMAVLink >= next_interval_MAVLink) {
         previousMillisMAVLink = currentMillisMAVLink;
         send_heartbeat();
@@ -156,9 +155,7 @@ void PXComms::update_data() {
             num_hbs_sent = 0;
         }
     }
-    while (px_serial->available()) {
-        receive_data();
-    }
+    receive_data();
 }
 
 float PXComms::get_airspeed() {
