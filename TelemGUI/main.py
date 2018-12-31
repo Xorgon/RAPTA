@@ -1,6 +1,7 @@
 # TODO: Add file logging.
 
 import serial
+import serial.tools.list_ports as list_ports
 import ctypes
 
 from PyQt5 import QtGui, QtWidgets, QtCore
@@ -23,7 +24,7 @@ class TelemGUIApp(QtWidgets.QMainWindow, TelemGUI.Ui_MainWindow):
     aoa = None
     eng_status = None
 
-    def __init__(self, parent=None):
+    def __init__(self, com_port, parent=None):
         super(TelemGUIApp, self).__init__(parent)
         self.setupUi(self)
 
@@ -31,13 +32,13 @@ class TelemGUIApp(QtWidgets.QMainWindow, TelemGUI.Ui_MainWindow):
         myappid = u'TelemGUI'  # arbitrary string
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
 
-        self.ser = serial.Serial('COM7')
-        self.ser_timer = QtCore.QTimer()
-        self.ser_timer.setInterval(10)
-        self.ser_timer.timeout.connect(self.read_serial)
-        self.ser_timer.start()
+        self.openDialog()
+        # self.startSerial(com_port)
 
     def read_serial(self):
+        if not self.ser.is_open:
+            self.statusbar.showMessage("Serial port is not open")
+            return
         bad_packet_msg = "Received bad packet"
         line = self.ser.readline().strip().decode('utf-8')
         split = line.split(",")
@@ -75,12 +76,27 @@ class TelemGUIApp(QtWidgets.QMainWindow, TelemGUI.Ui_MainWindow):
         self.eng_status_box.setText(self.eng_status)
 
     def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
-        self.ser.close()
+        if self.ser is not None and self.ser.is_open:
+            self.ser.close()
         super().closeEvent(a0)
+
+    def openDialog(self):
+        text, ok = QtWidgets.QInputDialog.getItem(self, 'COM Port',
+                                                  'Select COM Port', [p.device for p in list_ports.comports()])
+
+        if ok:
+            self.startSerial(str(text))
+
+    def startSerial(self, com_port):
+        self.ser = serial.Serial(com_port)
+        self.ser_timer = QtCore.QTimer()
+        self.ser_timer.setInterval(10)
+        self.ser_timer.timeout.connect(self.read_serial)
+        self.ser_timer.start()
 
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
-    gui = TelemGUIApp()
+    gui = TelemGUIApp("COM7")
     gui.show()
     app.exec_()
