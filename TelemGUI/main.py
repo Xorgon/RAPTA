@@ -82,10 +82,10 @@ class TelemGUIApp(QtWidgets.QMainWindow, TelemGUI.Ui_MainWindow):
 
     def openDialog(self):
         text, ok = QtWidgets.QInputDialog.getItem(self, 'COM Port',
-                                                  'Select COM Port', [p.device for p in list_ports.comports()])
+                                                  'Select COM Port', [p.description for p in list_ports.comports()])
 
         if ok:
-            self.startSerial(str(text))
+            self.startSerial(str(text)[-5:-1])
 
     def startSerial(self, com_port):
         self.ser = serial.Serial(com_port)
