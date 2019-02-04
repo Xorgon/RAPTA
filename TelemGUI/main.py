@@ -24,6 +24,9 @@ class TelemGUIApp(QtWidgets.QMainWindow, TelemGUI.Ui_MainWindow):
     aoa = None
     eng_status = None
 
+    total_packets = 0
+    bad_packets = 0
+
     def __init__(self, parent=None):
         super(TelemGUIApp, self).__init__(parent)
         self.setupUi(self)
@@ -39,10 +42,11 @@ class TelemGUIApp(QtWidgets.QMainWindow, TelemGUI.Ui_MainWindow):
         if not self.ser.is_open:
             self.statusbar.showMessage("Serial port is not open")
             return
+        self.total_packets += 1
         bad_packet_msg = "Received bad packet"
         line = self.ser.readline().strip().decode('utf-8')
-        split = line.split(",")
-        if len(split) == 10:
+        split = line.strip("~").split(",")
+        if len(split) == 10 and line[-1] == "~":
             self.millis, \
             self.ias, \
             self.alt, \
@@ -57,6 +61,8 @@ class TelemGUIApp(QtWidgets.QMainWindow, TelemGUI.Ui_MainWindow):
             self.set_display_nums()
             self.statusbar.showMessage(line)
         else:
+            self.bad_packets += 1
+            print(100 * self.bad_packets / self.total_packets)
             self.statusbar.showMessage(bad_packet_msg + ": " + line)
 
     def set_display_nums(self):
