@@ -24,7 +24,7 @@ class TelemGUIApp(QtWidgets.QMainWindow, TelemGUI.Ui_MainWindow):
     aoa = None
     eng_status = None
 
-    def __init__(self, com_port, parent=None):
+    def __init__(self, parent=None):
         super(TelemGUIApp, self).__init__(parent)
         self.setupUi(self)
 
@@ -85,10 +85,12 @@ class TelemGUIApp(QtWidgets.QMainWindow, TelemGUI.Ui_MainWindow):
                                                   'Select COM Port', [p.description for p in list_ports.comports()])
 
         if ok:
-            self.startSerial(str(text)[-5:-1])
+            s = str(text)
+            c = s.find("COM")
+            self.startSerial(s[c:c+5])
 
     def startSerial(self, com_port):
-        self.ser = serial.Serial(com_port)
+        self.ser = serial.Serial(com_port, baudrate=57600)
         self.ser_timer = QtCore.QTimer()
         self.ser_timer.setInterval(10)
         self.ser_timer.timeout.connect(self.read_serial)
@@ -97,6 +99,6 @@ class TelemGUIApp(QtWidgets.QMainWindow, TelemGUI.Ui_MainWindow):
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
-    gui = TelemGUIApp("COM7")
+    gui = TelemGUIApp()
     gui.show()
     app.exec_()
