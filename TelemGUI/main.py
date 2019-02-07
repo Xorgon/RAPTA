@@ -2,6 +2,7 @@
 
 import serial
 import serial.tools.list_ports as list_ports
+import re
 import ctypes
 
 from PyQt5 import QtGui, QtWidgets, QtCore
@@ -91,9 +92,8 @@ class TelemGUIApp(QtWidgets.QMainWindow, TelemGUI.Ui_MainWindow):
                                                   'Select COM Port', [p.description for p in list_ports.comports()])
 
         if ok:
-            s = str(text)
-            c = s.find("COM")
-            self.startSerial(s[c:c+5])
+            port = re.findall("(COM\d+)", str(text))[-1]
+            self.startSerial(port)
 
     def startSerial(self, com_port):
         self.ser = serial.Serial(com_port, baudrate=57600)
