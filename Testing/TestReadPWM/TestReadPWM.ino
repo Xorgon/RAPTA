@@ -22,6 +22,6 @@ void onRising() {
 }
 
 void onFalling() {
-    attachInterrupt(digitalPinToInterrupt(2), onRising, RISING);
     pwmValue = micros() - lastPWMTime;
+    attachInterrupt(digitalPinToInterrupt(2), onRising, RISING);
 }
