@@ -5,13 +5,14 @@
 #ifndef RAPTA_ECU_H
 #define RAPTA_ECU_H
 
+#include <Arduino.h>
+
 #define SYNC char(0xC7)
 #define SEPARATOR char(0x2C)
 #define CR char(0x0D)
 #define MAX_RESPONSE_LENGTH 100
-#define CMD_DELAY 50
 
-#include <AltSoftSerial.h>
+#define CMD_DELAY 50
 
 typedef struct __ecu_response_t {
     bool valid;
@@ -30,8 +31,6 @@ typedef struct __eng_data_t {
 class ECU {
 public:
     ECU();
-
-    ECU(uint8_t softSerialRX, uint8_t softSerialTX);
 
     ECU(HardwareSerial &hardwareSerial);
 

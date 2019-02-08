@@ -8,15 +8,12 @@
 
 #include <Arduino.h>
 #include <mavlink.h>
-#include <AltSoftSerial.h>
 
 class PXComms {
 public:
     PXComms();
 
     PXComms(HardwareSerial &hardwareSerial);
-
-    PXComms(uint8_t soft_serial_rx, uint8_t soft_serial_tx);
 
     void send_heartbeat();
 

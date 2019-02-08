@@ -13,13 +13,6 @@ PXComms::PXComms(HardwareSerial &hardware_serial) {
     initialize_counters();
 }
 
-PXComms::PXComms(uint8_t soft_serial_rx, uint8_t soft_serial_tx) {
-    AltSoftSerial *soft_serial = new AltSoftSerial(soft_serial_rx, soft_serial_tx);
-    soft_serial->begin(115200);
-    px_serial = soft_serial;
-    initialize_counters();
-}
-
 void PXComms::initialize_counters() {
     previousMillisMAVLink = 0;     // will store last time MAVLink was transmitted and listened
     next_interval_MAVLink = 1000;  // next interval to count

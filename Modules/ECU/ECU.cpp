@@ -6,14 +6,6 @@
 
 ECU::ECU() {}
 
-ECU::ECU(uint8_t softSerialRX, uint8_t softSerialTX) {
-    AltSoftSerial *softSerial = new AltSoftSerial(softSerialRX, softSerialTX);
-    softSerial->begin(9600);
-    ecuSerial = softSerial;
-    last_cmd_millis = 0;
-    last_cmd = "RSD";
-}
-
 ECU::ECU(HardwareSerial &hardwareSerial) {
     ecuSerial = &hardwareSerial;
     hardwareSerial.begin(9600);
