@@ -91,3 +91,4 @@ cmake-build-debug/*
 libraries/SD/*
 libraries/MemoryFree/*
 */__pycache__/*
+*/*/__pycache__/*
