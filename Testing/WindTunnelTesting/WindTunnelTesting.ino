@@ -9,8 +9,8 @@ PXComms pixhawk;
 char output[500];
 
 uint8_t configChangePin = 2;
-uint16_t lowerThreshold = 1500; // If lower than this, move down a configuration
-uint16_t upperThreshold = 1800; // If higher than this, move up a configuration
+uint16_t lowerThreshold = 1450; // If lower than this, move down a configuration
+uint16_t upperThreshold = 1550; // If higher than this, move up a configuration
 bool changed = false;
 uint8_t config = 0;
 uint8_t max_config = 1;
