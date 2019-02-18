@@ -26,6 +26,8 @@ class TelemGUIApp(QtWidgets.QMainWindow, TelemGUI.Ui_MainWindow):
     eng_status = None
     rssi = None
     px_bat_voltage = None
+    load_cell = None
+    fuel_pct = None
 
     total_packets = 0
     bad_packets = 0
@@ -50,7 +52,7 @@ class TelemGUIApp(QtWidgets.QMainWindow, TelemGUI.Ui_MainWindow):
         bad_packet_msg = "Received bad packet"
         line = self.ser.readline().strip().decode('utf-8')
         split = line.strip("~").split(",")
-        if len(split) == 12 and line[-1] == "~":
+        if len(split) == 14 and line[-1] == "~":
             self.millis, \
             self.ias, \
             self.alt, \
@@ -62,14 +64,16 @@ class TelemGUIApp(QtWidgets.QMainWindow, TelemGUI.Ui_MainWindow):
             self.aoa, \
             self.eng_status, \
             self.rssi, \
-            self.px_bat_voltage = split
+            self.px_bat_voltage, \
+            self.load_cell, \
+            self.fuel_pct = split
 
             self.set_display_nums()
             self.statusbar.showMessage(line)
         else:
             self.bad_packets += 1
-            self.packet_loss = 100 * self.bad_packets / self.total_packets
             self.statusbar.showMessage(bad_packet_msg + ": " + line)
+        self.packet_loss = 100 * self.bad_packets / self.total_packets
 
     def set_display_nums(self):
         try:
@@ -86,9 +90,11 @@ class TelemGUIApp(QtWidgets.QMainWindow, TelemGUI.Ui_MainWindow):
         self.alt_number.display(self.alt)
         self.aoa_number.display(self.aoa)
         self.eng_status_box.setText(self.eng_status)
-        self.packet_loss_number.display(self.packet_loss)
+        self.packet_loss_number.display("{:3.2f}".format(self.packet_loss))
         self.rssi_number.display(self.rssi)
-        self.px_bat_voltage_number.display(self.px_bat_voltage)
+        self.px_bat_voltage_number.display("{:.2f}".format(float(self.px_bat_voltage) / 1000))
+        self.load_cell_number.display(self.load_cell)
+        self.fuel_pct_number.display(self.fuel_pct)
 
     def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
         if self.ser is not None and self.ser.is_open:
