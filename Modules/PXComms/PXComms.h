@@ -29,6 +29,8 @@ public:
 
     int8_t get_battery_pcnt();
 
+    uint16_t get_battery_mv();
+
 private:
     void initialize_counters();
 

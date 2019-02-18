@@ -162,3 +162,7 @@ float PXComms::get_altitude() {
 int8_t PXComms::get_battery_pcnt() {
     return this->sys_status.battery_remaining;
 }
+
+uint16_t PXComms::get_battery_mv() {
+    return this->sys_status.voltage_battery;
+}
