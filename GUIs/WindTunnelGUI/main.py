@@ -26,6 +26,7 @@ class WindTunnelGUIApp(QtWidgets.QMainWindow, WindTunnelGUI.Ui_MainWindow):
 
     total_packets = 0
     bad_packets = 0
+    packet_loss = 0
 
     def __init__(self, parent=None):
         super(WindTunnelGUIApp, self).__init__(parent)
@@ -61,7 +62,7 @@ class WindTunnelGUIApp(QtWidgets.QMainWindow, WindTunnelGUI.Ui_MainWindow):
             self.statusbar.showMessage(line)
         else:
             self.bad_packets += 1
-            print(100 * self.bad_packets / self.total_packets)
+            self.packet_loss = 100 * self.bad_packets / self.total_packets
             self.statusbar.showMessage(bad_packet_msg + ": " + line)
 
     def set_display_nums(self):

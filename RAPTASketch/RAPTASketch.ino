@@ -1,7 +1,10 @@
 #include <Arduino.h>
+#include "Servo.h"
 #include "ECU.h"
 #include "MagEncoder.h"
 #include "PXComms.h"
+
+#define rssiPin A0
 
 ECU ecu;
 MagEncoder aoaSensor;
@@ -22,7 +25,8 @@ void loop() {
     float angle = aoaSensor.getAngle();
     ecu.updateAll();
     pixhawk.receive_data();
-    sprintf(output, "%lu,%s,%s,%lu,%u,%s,%s,%u,%s,%s~",
+    float rssi = 100 * (analogRead(rssiPin) * 5.0 / 3.3) / 1024;
+    sprintf(output, "%lu,%s,%s,%lu,%u,%s,%s,%u,%s,%s,%s,%i~",
             millis(),
             String(pixhawk.get_airspeed()).c_str(),
             String(pixhawk.get_altitude()).c_str(),
@@ -32,7 +36,9 @@ void loop() {
             String(ecu.data.batVoltage).c_str(),
             ecu.data.throttlePct,
             String(angle).c_str(),
-            ecu.status.c_str()
+            ecu.status.c_str(),
+            String(rssi).c_str(),
+            pixhawk.get_battery_pcnt()
     );
     Serial.println(output);
     delay(50);

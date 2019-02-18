@@ -20,13 +20,16 @@ class TelemGUIApp(QtWidgets.QMainWindow, TelemGUI.Ui_MainWindow):
     rpm = None
     egt = None
     pump_power = None
-    bat_voltage = None
+    eng_bat_voltage = None
     throttle_pct = None
     aoa = None
     eng_status = None
+    rssi = None
+    px_bat_voltage = None
 
     total_packets = 0
     bad_packets = 0
+    packet_loss = 0
 
     def __init__(self, parent=None):
         super(TelemGUIApp, self).__init__(parent)
@@ -47,23 +50,25 @@ class TelemGUIApp(QtWidgets.QMainWindow, TelemGUI.Ui_MainWindow):
         bad_packet_msg = "Received bad packet"
         line = self.ser.readline().strip().decode('utf-8')
         split = line.strip("~").split(",")
-        if len(split) == 10 and line[-1] == "~":
+        if len(split) == 12 and line[-1] == "~":
             self.millis, \
             self.ias, \
             self.alt, \
             self.rpm, \
             self.egt, \
             self.pump_power, \
-            self.bat_voltage, \
+            self.eng_bat_voltage, \
             self.throttle_pct, \
             self.aoa, \
-            self.eng_status = split
+            self.eng_status, \
+            self.rssi, \
+            self.px_bat_voltage = split
 
             self.set_display_nums()
             self.statusbar.showMessage(line)
         else:
             self.bad_packets += 1
-            print(100 * self.bad_packets / self.total_packets)
+            self.packet_loss = 100 * self.bad_packets / self.total_packets
             self.statusbar.showMessage(bad_packet_msg + ": " + line)
 
     def set_display_nums(self):
@@ -76,11 +81,14 @@ class TelemGUIApp(QtWidgets.QMainWindow, TelemGUI.Ui_MainWindow):
         self.rpm_number.display(self.rpm)
         self.egt_number.display(self.egt)
         self.pump_power_number.display(self.pump_power)
-        self.bat_voltage_number.display(self.bat_voltage)
+        self.bat_voltage_number.display(self.eng_bat_voltage)
         self.throttle_pct_number.display(self.throttle_pct)
         self.alt_number.display(self.alt)
         self.aoa_number.display(self.aoa)
         self.eng_status_box.setText(self.eng_status)
+        self.packet_loss_number.display(self.packet_loss)
+        self.rssi_number.display(self.rssi)
+        self.px_bat_voltage_number.display(self.px_bat_voltage)
 
     def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
         if self.ser is not None and self.ser.is_open:
