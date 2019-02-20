@@ -4,6 +4,7 @@ import serial
 import serial.tools.list_ports as list_ports
 import re
 import ctypes
+import datetime
 
 from PyQt5 import QtGui, QtWidgets, QtCore
 import sys
@@ -32,6 +33,9 @@ class TelemGUIApp(QtWidgets.QMainWindow, TelemGUI.Ui_MainWindow):
     total_packets = 0
     bad_packets = 0
     packet_loss = 0
+
+    init_remote_time = None
+    init_local_time = None
 
     def __init__(self, parent=None):
         super(TelemGUIApp, self).__init__(parent)
@@ -70,6 +74,14 @@ class TelemGUIApp(QtWidgets.QMainWindow, TelemGUI.Ui_MainWindow):
 
             self.set_display_nums()
             self.statusbar.showMessage(line)
+            if self.init_remote_time is None:
+                self.init_remote_time = float(self.millis) / 1000
+                self.init_local_time = datetime.datetime.now()
+            else:
+                remote_delta = float(self.millis) / 1000 - self.init_remote_time
+                local_delta = (datetime.datetime.now() - self.init_local_time).total_seconds()
+                delta_diff = remote_delta - local_delta
+                print(delta_diff)  # TODO: Put in GUI
         else:
             self.bad_packets += 1
             self.statusbar.showMessage(bad_packet_msg + ": " + line)
