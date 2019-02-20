@@ -12,6 +12,7 @@
 MagEncoder aoaSensor;
 PXComms pixhawk;
 HX711 loadCell;
+long loadCellReading;
 
 char output[500];
 
@@ -19,7 +20,8 @@ void setup() {
     Serial.begin(57600);
     pixhawk = PXComms(Serial2);
     aoaSensor = MagEncoder(4, 7, 8);
-    loadCell = HX711(LOAD_CELL_DOUT, LOAD_CELL_CLK);
+    loadCell.begin(LOAD_CELL_DOUT, LOAD_CELL_CLK);
+    loadCellReading = 0;
     pixhawk.send_data_request();
 }
 
@@ -28,7 +30,10 @@ void loop() {
 //    ecu.updateAll();
     pixhawk.receive_data();
     float rssi = 100 * (analogRead(rssiPin) * 5.0 / 3.3) / 1024;
-    sprintf(output, "%lu,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%u,%lu,%s~",
+    if (loadCell.is_ready()) {
+        loadCellReading = loadCell.read();
+    }
+    sprintf(output, "%lu,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%u,%s,%s~",
             millis(),
             String(pixhawk.get_airspeed()).c_str(),
             String(pixhawk.get_altitude()).c_str(),
@@ -41,7 +46,7 @@ void loop() {
             "----", //ecu.status.c_str(),
             String(rssi).c_str(),
             pixhawk.get_battery_mv(),
-            0,
+            String(loadCellReading).c_str(),
             String("--").c_str()
     );
     Serial.println(output);

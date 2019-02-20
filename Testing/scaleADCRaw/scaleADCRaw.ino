@@ -13,5 +13,5 @@ void loop() {
   Serial.print(millis());
   Serial.print(',');
   Serial.println(scale.read());
-  
+  delay(250);
 }
