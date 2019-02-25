@@ -2,8 +2,8 @@
 // Created by Elijah on 14/02/2017.
 //
 
-#ifndef QUADCOPTER_PROJECT_LOGGER_H
-#define QUADCOPTER_PROJECT_LOGGER_H
+#ifndef RAPTA_LOGGER_H
+#define RAPTA_LOGGER_H
 
 #include <Arduino.h>
 #include <SD.h>
@@ -11,9 +11,9 @@
 /**
  * Allows for easy logging of information to the SD card and to the Serial monitor using log().
  *
- * The Logger writes "FLIGHTX.QFL" (Quadcopter Flight Log) files to the logs folder on the SD card.
+ * The Logger writes "FLIGHTX.LOG" files to the logs folder on the SD card.
  *
- * The flights are numerically ordered, so the first flight would be FLIGHT1.QFL.
+ * The flights are numerically ordered, so the first flight would be FLIGHT1.LOG.
  *
  * \see Logger::log() for logging data.
  *
@@ -47,4 +47,4 @@ private:
 
 };
 
-#endif //QUADCOPTER_PROJECT_LOGGER_H
+#endif //RAPTA_LOGGER_H

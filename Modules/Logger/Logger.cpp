@@ -13,9 +13,8 @@ Logger::Logger(int sdChipSelect) {
     lastFlushed = 0;
     SD.begin(sdChipSelect);
     String logName = getNextName();
-    Serial.println("Logging to: " + logName + ".QFL");
-    logFile = SD.open("/logs/" + logName + ".qfl", O_CREAT | O_WRITE);
-    log(F("Logger"), F("Started."));
+    Serial.println("Logging to: " + logName + ".LOG");
+    logFile = SD.open("/logs/" + logName + ".log", O_CREAT | O_WRITE);
 }
 
 /**
@@ -25,14 +24,14 @@ Logger::Logger() {};
 
 /**
  * Prepares data for logging and writes to an SD card when buffer is full.
+ * Use this for event based logging rather than data logging.
+ *
  * @param tag The name of the module calling the function.
  * @param data The data to be logged.
  */
 void Logger::log(String tag, String data) {
-    String logLine = "[" + parseMillis(millis()) + "][" + tag + "] " + data + "\n";
-    checkFlush(logLine.length());
-    logFile.print(logLine);
-    bytesWritten += logLine.length();
+    String logLine = "[" + parseMillis(millis()) + "][" + tag + "] " + data;
+    log(logLine);
 }
 
 /**
@@ -41,14 +40,14 @@ void Logger::log(String tag, String data) {
  */
 void Logger::log(String logLine) {
     checkFlush(logLine.length());
-    logFile.print(logLine);
+    logFile.println(logLine);
     bytesWritten += logLine.length();
 }
 
 /**
  * Checks if the SD buffer needs to be flushed, and flushes it.
  */
-void Logger::checkFlush(uint16_t logLineLength){
+void Logger::checkFlush(uint16_t logLineLength) {
     if (bytesWritten + logLineLength > 512 || millis() - lastFlushed > 3000) {
         logFile.flush();
         bytesWritten = 0;
@@ -56,7 +55,7 @@ void Logger::checkFlush(uint16_t logLineLength){
     }
 }
 
-void Logger::checkFlush(){
+void Logger::checkFlush() {
     if (millis() - lastFlushed > 3000) {
         logFile.flush();
         bytesWritten = 0;
@@ -99,7 +98,14 @@ String Logger::parseMillis(uint32_t millis) {
  * @return Log file name. e.g. "FLIGHT9"
  */
 String Logger::getNextName() {
-    File dir = SD.open(F("/logs/"));
+    File dir = SD.open(F("/LOGS/"));
+    if (!dir) {
+        if (SD.mkdir(F("LOGS"))) {
+            dir = SD.open(F("/LOGS/"));
+        } else {
+            Serial.println(F("FAILED TO CREATE /LOGS/ DIRECTORY"));
+        }
+    }
     int maxFlightN = 0;
     while (true) {
         File file = dir.openNextFile();
@@ -109,18 +115,14 @@ String Logger::getNextName() {
         }
         String name = file.name();
         int len = name.length();
-        if (name.substring(len - 3, len) == F("QFL")) {
+        if (name.substring(len - 3, len) == F("LOG")) {
             name.replace(F("FLIGHT"), F(""));
-            name.replace(F(".QFL"), F(""));
+            name.replace(F(".LOG"), F(""));
             int flightN = name.toInt();
             if (flightN > maxFlightN) {
                 maxFlightN = flightN;
             }
         }
-    }
-    if (maxFlightN >= 15) {
-        Serial.println(F("WARNING: EMPTY FLIGHT LOGS FOR NEW FLIGHT LOGS TO BE CREATED."));
-        maxFlightN = 15;
     }
     return "FLIGHT" + String(maxFlightN + 1);
 }

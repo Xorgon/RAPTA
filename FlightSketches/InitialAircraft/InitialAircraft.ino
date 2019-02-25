@@ -4,6 +4,7 @@
 #include "MagEncoder.h"
 #include "PXComms.h"
 #include "HX711.h"
+#include "Logger.h"
 
 #define rssiPin A0
 #define LOAD_CELL_DOUT  13
@@ -13,6 +14,7 @@ MagEncoder aoaSensor;
 PXComms pixhawk;
 HX711 loadCell;
 long loadCellReading;
+Logger logger;
 
 char output[500];
 
@@ -22,6 +24,7 @@ void setup() {
     aoaSensor = MagEncoder(4, 7, 8);
     loadCell.begin(LOAD_CELL_DOUT, LOAD_CELL_CLK);
     loadCellReading = 0;
+    logger = Logger(5);
     pixhawk.send_data_request();
 }
 
@@ -50,5 +53,6 @@ void loop() {
             String("--").c_str()
     );
     Serial.println(output);
+    logger.log(output);
     delay(50);
 }
