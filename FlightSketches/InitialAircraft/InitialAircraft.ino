@@ -7,6 +7,7 @@
 #include "Logger.h"
 
 #define rssiPin A0
+#define edfBatPin A1
 #define LOAD_CELL_DOUT  13
 #define LOAD_CELL_CLK  12
 
@@ -32,7 +33,8 @@ void loop() {
     float angle = aoaSensor.getAngle();
 //    ecu.updateAll();
     pixhawk.receive_data();
-    float rssi = 100 * (analogRead(rssiPin) * 5.0 / 3.3) / 1024;
+    float rssi = 100 * (analogRead(rssiPin) * 4.8 / 3.3) / 1024;
+    float batVoltage = 1.066 * 10.0 * 4.8 * analogRead(edfBatPin) / 1024.0;  // 1.066 is calibration factor
     if (loadCell.is_ready()) {
         loadCellReading = loadCell.read();
     }
@@ -43,7 +45,7 @@ void loop() {
             "--", //ecu.data.rpm,
             "--", //ecu.data.egt,
             "--", //String(ecu.data.pumpPower).c_str(),
-            String(0.0).c_str(), //String(ecu.data.batVoltage).c_str(),
+            String(batVoltage).c_str(), //String(ecu.data.batVoltage).c_str(),
             "--", //ecu.data.throttlePct,
             String(angle).c_str(),
             "----", //ecu.status.c_str(),
@@ -54,5 +56,5 @@ void loop() {
     );
     Serial.println(output);
     logger.log(output);
-    delay(50);
+    delay(100);
 }
