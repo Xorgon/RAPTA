@@ -38,6 +38,8 @@ class TelemGUIApp(QtWidgets.QMainWindow, TelemGUI.Ui_MainWindow):
     init_remote_time = None
     init_local_time = None
 
+    dump_file = None
+
     def __init__(self, parent=None):
         super(TelemGUIApp, self).__init__(parent)
         self.setupUi(self)
@@ -45,6 +47,8 @@ class TelemGUIApp(QtWidgets.QMainWindow, TelemGUI.Ui_MainWindow):
         # Reset the App ID to interact more nicely with Windows (separate icon from generic Python etc.).
         myappid = u'TelemGUI'  # arbitrary string
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+
+        self.dump_file = open("telem_dump.log", "a")
 
         self.openDialog()
         # self.startSerial(com_port)
@@ -56,6 +60,7 @@ class TelemGUIApp(QtWidgets.QMainWindow, TelemGUI.Ui_MainWindow):
         self.total_packets += 1
         bad_packet_msg = "Received bad packet"
         line = self.ser.readline().strip().decode('utf-8')
+        self.dump_file.write(line + "\n")
         split = line.strip("~").split(",")
         if len(split) == 15 and line[-1] == "~":
             self.millis, \
