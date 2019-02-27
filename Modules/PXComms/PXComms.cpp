@@ -129,6 +129,11 @@ void PXComms::receive_data() {
                     mavlink_msg_vfr_hud_decode(&msg, &(vfr_hud_data));
                 }
 
+                case MAVLINK_MSG_ID_GPS_STATUS:
+                {
+                    mavlink_msg_gps_status_decode(&msg, &(gps_status));
+                }
+
                 default:
                     break;
             }
@@ -165,4 +170,8 @@ int8_t PXComms::get_battery_pcnt() {
 
 uint16_t PXComms::get_battery_mv() {
     return this->sys_status.voltage_battery;
+}
+
+uint8_t PXComms::get_gps_sats() {
+    return this->gps_status.satellites_visible;
 }

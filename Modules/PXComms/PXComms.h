@@ -31,11 +31,15 @@ public:
 
     uint16_t get_battery_mv();
 
+    uint8_t get_gps_sats();
+
 private:
     void initialize_counters();
 
     mavlink_vfr_hud_t vfr_hud_data;
     mavlink_sys_status_t sys_status;
+    mavlink_gps_status_t gps_status;
+
     mavlink_message_t msg;
     uint8_t buf[MAVLINK_MAX_PACKET_LEN];
     Stream *px_serial;

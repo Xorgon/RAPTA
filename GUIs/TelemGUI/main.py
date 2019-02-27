@@ -29,6 +29,7 @@ class TelemGUIApp(QtWidgets.QMainWindow, TelemGUI.Ui_MainWindow):
     px_bat_voltage = None
     load_cell = None
     fuel_pct = None
+    gps_sats = None
 
     total_packets = 0
     bad_packets = 0
@@ -56,7 +57,7 @@ class TelemGUIApp(QtWidgets.QMainWindow, TelemGUI.Ui_MainWindow):
         bad_packet_msg = "Received bad packet"
         line = self.ser.readline().strip().decode('utf-8')
         split = line.strip("~").split(",")
-        if len(split) == 14 and line[-1] == "~":
+        if len(split) == 15 and line[-1] == "~":
             self.millis, \
             self.ias, \
             self.alt, \
@@ -70,7 +71,8 @@ class TelemGUIApp(QtWidgets.QMainWindow, TelemGUI.Ui_MainWindow):
             self.rssi, \
             self.px_bat_voltage, \
             self.load_cell, \
-            self.fuel_pct = split
+            self.fuel_pct, \
+            self.gps_sats = split
 
             self.set_display_nums()
             self.statusbar.showMessage(line)
@@ -107,6 +109,7 @@ class TelemGUIApp(QtWidgets.QMainWindow, TelemGUI.Ui_MainWindow):
         self.px_bat_voltage_number.display("{:.2f}".format(float(self.px_bat_voltage) / 1000))
         self.load_cell_number.display(self.load_cell)
         self.fuel_pct_number.display(self.fuel_pct)
+        self.gps_number.display(self.gps_sats)
 
     def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
         if self.ser is not None and self.ser.is_open:
