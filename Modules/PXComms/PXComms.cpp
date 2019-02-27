@@ -128,11 +128,13 @@ void PXComms::receive_data() {
                 {
                     mavlink_msg_vfr_hud_decode(&msg, &(vfr_hud_data));
                 }
+                    break;
 
-                case MAVLINK_MSG_ID_GPS_STATUS:
+                case MAVLINK_MSG_ID_GPS_STATUS:  // #25
                 {
                     mavlink_msg_gps_status_decode(&msg, &(gps_status));
                 }
+                    break;
 
                 default:
                     break;

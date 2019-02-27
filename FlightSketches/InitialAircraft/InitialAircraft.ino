@@ -38,7 +38,7 @@ void loop() {
     if (loadCell.is_ready()) {
         loadCellReading = loadCell.read();
     }
-    sprintf(output, "%lu,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%u,%s,%s,%s~",
+    sprintf(output, "%lu,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%u,%s,%s,%u~",
             millis(),
             String(pixhawk.get_airspeed()).c_str(),
             String(pixhawk.get_altitude()).c_str(),
@@ -53,7 +53,7 @@ void loop() {
             pixhawk.get_battery_mv(),
             String(loadCellReading).c_str(),
             String("--").c_str(),
-            String(pixhawk.get_gps_sats()).c_str()
+            pixhawk.get_gps_sats()
     );
     Serial.println(output);
     logger.log(output);
