@@ -11,10 +11,13 @@
 #define LOAD_CELL_DOUT  13
 #define LOAD_CELL_CLK  12
 
+#define LOAD_CELL_QUOTIENT 219371.22
+
 MagEncoder aoaSensor;
 PXComms pixhawk;
 HX711 loadCell;
 long loadCellReading;
+long loadCellTare;
 Logger logger;
 
 char output[500];
@@ -24,6 +27,10 @@ void setup() {
     pixhawk = PXComms(Serial2);
     aoaSensor = MagEncoder(4, 7, 8);
     loadCell.begin(LOAD_CELL_DOUT, LOAD_CELL_CLK);
+    while (!loadCell.is_ready()) {
+      Serial.println("Waiting for load cell...");
+    }
+    loadCellTare = loadCell.read();
     loadCellReading = 0;
     logger = Logger(5);
     pixhawk.send_data_request();
@@ -36,7 +43,7 @@ void loop() {
     float rssi = 100 * (analogRead(rssiPin) * 4.8 / 3.3) / 1024;
     float batVoltage = 1.066 * 10.0 * 4.8 * analogRead(edfBatPin) / 1024.0;  // 1.066 is calibration factor
     if (loadCell.is_ready()) {
-        loadCellReading = loadCell.read();
+        loadCellReading = loadCell.read() - loadCellTare;
     }
     sprintf(output, "%lu,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%u,%s,%s,%u~",
             millis(),
@@ -51,7 +58,7 @@ void loop() {
             "----", //ecu.status.c_str(),
             String(rssi).c_str(),
             pixhawk.get_battery_mv(),
-            String(loadCellReading).c_str(),
+            String(loadCellReading / LOAD_CELL_QUOTIENT).c_str(),
             String("--").c_str(),
             pixhawk.get_gps_sats()
     );
