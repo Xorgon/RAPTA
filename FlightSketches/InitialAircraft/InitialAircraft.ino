@@ -8,6 +8,7 @@
 
 #define rssiPin A0
 #define edfBatPin A1
+#define pwmPin 2
 #define LOAD_CELL_DOUT  13
 #define LOAD_CELL_CLK  12
 
@@ -20,6 +21,8 @@ long loadCellReading;
 long loadCellTare;
 Logger logger;
 
+uint32_t lastPWMTime;
+uint16_t pwmValue;
 char output[500];
 
 void setup() {
@@ -34,6 +37,7 @@ void setup() {
     loadCellReading = 0;
     logger = Logger(5);
     pixhawk.send_data_request();
+    attachInterrupt(digitalPinToInterrupt(pwmPin), onFalling, FALLING);
 }
 
 void loop() {
@@ -53,7 +57,7 @@ void loop() {
             "--", //ecu.data.egt,
             "--", //String(ecu.data.pumpPower).c_str(),
             String(batVoltage).c_str(), //String(ecu.data.batVoltage).c_str(),
-            "--", //ecu.data.throttlePct,
+            String(pwmValue).c_str(), //ecu.data.throttlePct,
             String(angle).c_str(),
             "----", //ecu.status.c_str(),
             String(rssi).c_str(),
@@ -65,4 +69,14 @@ void loop() {
     Serial.println(output);
     logger.log(output);
     delay(100);
+}
+
+void onRising() {
+    attachInterrupt(digitalPinToInterrupt(pwmPin), onFalling, FALLING);
+    lastPWMTime = micros();
+}
+
+void onFalling() {
+    pwmValue = micros() - lastPWMTime;
+    attachInterrupt(digitalPinToInterrupt(pwmPin), onRising, RISING);
 }
