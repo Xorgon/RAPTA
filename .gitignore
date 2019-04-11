@@ -92,3 +92,13 @@ libraries/SD/*
 libraries/MemoryFree/*
 */__pycache__/*
 */*/__pycache__/*
+
+# EAGLE
+*/*/*.b#*
+*/*/*.s#*
+*/*.zip
+*/*/*.zip
+*/*/*.pro
+*/*/*.cam
+*/*/CAMOutputs/*
+*/*/*.CFG
