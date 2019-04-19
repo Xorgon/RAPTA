@@ -136,6 +136,12 @@ void PXComms::receive_data() {
                 }
                     break;
 
+                case MAVLINK_MSG_ID_SCALED_IMU: // #26
+                {
+                    mavlink_msg_scaled_imu_decode(&msg, &(scaled_imu));
+                }
+                    break;
+
                 default:
                     break;
             }
