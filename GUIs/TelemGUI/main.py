@@ -5,6 +5,7 @@ import serial.tools.list_ports as list_ports
 import re
 import ctypes
 import datetime
+import struct
 
 from PyQt5 import QtGui, QtWidgets, QtCore
 import sys
@@ -58,11 +59,9 @@ class TelemGUIApp(QtWidgets.QMainWindow, TelemGUI.Ui_MainWindow):
             self.statusbar.showMessage("Serial port is not open")
             return
         self.total_packets += 1
-        bad_packet_msg = "Received bad packet"
-        line = self.ser.readline().strip().decode('utf-8')
-        self.dump_file.write(line + "\n")
-        split = line.strip("~").split(",")
-        if len(split) == 15 and line[-1] == "~":
+        packet = self.ser.read(77)  # 74 + 3 start chars
+        self.dump_file.write(packet + "\n")
+        if packet[0:3] == "\xC7\xC7\xC7":
             self.millis, \
             self.ias, \
             self.alt, \
@@ -76,11 +75,10 @@ class TelemGUIApp(QtWidgets.QMainWindow, TelemGUI.Ui_MainWindow):
             self.rssi, \
             self.px_bat_voltage, \
             self.load_cell, \
-            self.fuel_pct, \
-            self.gps_sats = split
+            self.fuel_pct = struct.unpack('LffLHffBf32sfHfb', packet[3:])
 
             self.set_display_nums()
-            self.statusbar.showMessage(line)
+            self.statusbar.showMessage("Packet received successfully")
             if self.init_remote_time is None:
                 self.init_remote_time = float(self.millis) / 1000
                 self.init_local_time = datetime.datetime.now()
@@ -91,7 +89,8 @@ class TelemGUIApp(QtWidgets.QMainWindow, TelemGUI.Ui_MainWindow):
                 print(delta_diff)  # TODO: Put in GUI
         else:
             self.bad_packets += 1
-            self.statusbar.showMessage(bad_packet_msg + ": " + line)
+            bad_packet_msg = "Received bad packet"
+            self.statusbar.showMessage(bad_packet_msg)
         self.packet_loss = 100 * self.bad_packets / self.total_packets
 
     def set_display_nums(self):
@@ -113,8 +112,11 @@ class TelemGUIApp(QtWidgets.QMainWindow, TelemGUI.Ui_MainWindow):
         self.rssi_number.display(self.rssi)
         self.px_bat_voltage_number.display("{:.2f}".format(float(self.px_bat_voltage) / 1000))
         self.load_cell_number.display(self.load_cell)
-        self.fuel_pct_number.display(self.fuel_pct)
-        self.gps_number.display(self.gps_sats)
+        self.fuel_pct_number.display(abs(self.fuel_pct))
+        if self.fuel_pct > 0:
+            self.fuel_pct_number.setStyleSheet("background-color: #aaffaa")
+        else:
+            self.fuel_pct_number.setStyleSheet("background-color: #ffaaaa")
 
     def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
         if self.ser is not None and self.ser.is_open:
