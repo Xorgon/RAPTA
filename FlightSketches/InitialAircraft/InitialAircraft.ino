@@ -47,7 +47,7 @@ void loop() {
     float rssi = 100 * (analogRead(rssiPin) * 4.8 / 3.3) / 1024;
     float batVoltage = 1.066 * 10.0 * 4.8 * analogRead(edfBatPin) / 1024.0;  // 1.066 is calibration factor
     if (loadCell.is_ready()) {
-        loadCellReading = loadCell.read() - loadCellTare;
+        loadCellReading = (loadCell.read() - loadCellTare) / LOAD_CELL_QUOTIENT;
     }
     sprintf(output, "%lu,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%u,%s,%s,%u~",
             millis(),
@@ -62,7 +62,7 @@ void loop() {
             "----", //ecu.status.c_str(),
             String(rssi).c_str(),
             pixhawk.get_battery_mv(),
-            String(loadCellReading / LOAD_CELL_QUOTIENT).c_str(),
+            String(loadCellReading).c_str(),
             String("--").c_str(),
             pixhawk.get_gps_sats()
     );
