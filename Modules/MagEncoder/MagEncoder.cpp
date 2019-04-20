@@ -54,7 +54,7 @@ unsigned int MagEncoder::getRawData() {
 }
 
 float MagEncoder::getAngle() {
-    float angle = 360.0 * getRawData() / 1024.0 - offset - 180.0;
+    float angle = 360.0 * getRawData() / 1024.0 - offset;
     if (angle < -180) {
         angle += 360;
     }

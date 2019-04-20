@@ -116,11 +116,7 @@ void PXComms::receive_data() {
 
                 case MAVLINK_MSG_ID_ATTITUDE:  // #30
                 {
-                    /* Message decoding: PRIMITIVE
-                     *    mavlink_msg_attitude_decode(const mavlink_message_t* msg, mavlink_attitude_t* attitude)
-                     */
-                    mavlink_attitude_t attitude;
-                    mavlink_msg_attitude_decode(&msg, &attitude);
+                    mavlink_msg_attitude_decode(&msg, &(attitude));
                 }
                     break;
 
@@ -182,4 +178,16 @@ uint16_t PXComms::get_battery_mv() {
 
 uint8_t PXComms::get_gps_sats() {
     return this->gps_status.satellites_visible;
+}
+
+float PXComms::get_pitch() {
+    return this->attitude.pitch;
+}
+
+float PXComms::get_acc_x() {
+    return this->scaled_imu.xacc * 9.81 / 1000.0;
+}
+
+float PXComms::get_acc_z() {
+    return this->scaled_imu.zacc * 9.81 / 1000.0;
 }

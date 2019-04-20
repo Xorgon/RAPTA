@@ -27,6 +27,12 @@ public:
 
     float get_altitude();
 
+    float get_pitch();
+
+    float get_acc_x();
+
+    float get_acc_z();
+
     int8_t get_battery_pcnt();
 
     uint16_t get_battery_mv();
@@ -40,6 +46,7 @@ private:
     mavlink_sys_status_t sys_status;
     mavlink_gps_status_t gps_status;
     mavlink_scaled_imu_t scaled_imu; // milli-gee (mg)
+    mavlink_attitude_t attitude;
 
     mavlink_message_t msg;
     uint8_t buf[MAVLINK_MAX_PACKET_LEN];
