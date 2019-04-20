@@ -12,8 +12,12 @@
 #define LOAD_CELL_DOUT  13
 #define LOAD_CELL_CLK  12
 #define LOAD_CELL_QUOTIENT 219371.22
+#define AOA_QUOTIENT 1.3298
 #define TELEM_INTERVAL 1000
 #define FUEL_SENSOR 35
+
+#define AIRCRAFT_MASS 8.1
+#define ENGINE_MASS 1
 
 typedef union {
     struct {
@@ -26,7 +30,8 @@ typedef union {
         float rssi;
         uint16_t batMilliVolts;
         float loadCellReading;
-        int8_t fuel_pct; // 74
+        float thrust;
+        int8_t fuel_pct; // 78
     } data;
     char s[sizeof(data)];
 } telem_t;
@@ -35,7 +40,7 @@ ECU ecu;
 MagEncoder aoaSensor;
 PXComms pixhawk;
 HX711 loadCell;
-long loadCellReading;
+float loadCellReading;
 long loadCellTare;
 Logger logger;
 
@@ -69,7 +74,7 @@ void loop() {
     ecu.updateAll();
     pixhawk.receive_data();
     if (loadCell.is_ready()) {
-        loadCellReading = loadCell.read() - loadCellTare;
+        loadCellReading = (loadCell.read() - loadCellTare) / LOAD_CELL_QUOTIENT;
     }
     int8_t fuel_pct;
     if (digitalRead(FUEL_SENSOR)) {
@@ -77,6 +82,13 @@ void loop() {
     } else {
         fuel_pct = 1;
     }
+    float aoa = aoaSensor.getAngle() / AOA_QUOTIENT;
+
+    // Drag calculation
+    float pitch = pixhaw.get_pitch();
+    float drag = (loadCellReading + ENGINE_MASS * sin(pitch)) * 9.81 * cos(aoa)
+                 - AIRCRAFT_MASS * 9.81 * sin(pitch - aoa)
+                 - AIRCRAFT_MASS * (pixhawk.get_acc_x() * cos(aoa) + pixhawk.get_acc_z() * sin(aoa));
 
     // Store new data in telem_data
     updateData(&telem_data,
@@ -84,7 +96,7 @@ void loop() {
                pixhawk.get_airspeed(),
                pixhawk.get_altitude(),
                ecu.data,
-               aoaSensor.getAngle(),
+               aoa,
                ecu.status.c_str(),
                100 * (analogRead(rssiPin) * 4.8 / 3.3) / 1024,  // RSSI
                pixhawk.get_battery_mv(),
@@ -103,8 +115,8 @@ void loop() {
     }
 }
 
-void updateData(telem_t *t, uint32_t time, float ias, float alt, eng_data_t eng_data, float aoa,
-                char eng_status[32], float rssi, uint16_t batMilliVolts, float loadCellReading, int8_t fuel_pct) {
+void updateData(telem_t *t, uint32_t time, float ias, float alt, eng_data_t eng_data, float aoa, char eng_status[32],
+                float rssi, uint16_t batMilliVolts, float loadCellReading, float thrust, int8_t fuel_pct) {
     (*t).data.time = time;
     (*t).data.ias = ias;
     (*t).data.alt = alt;
@@ -114,11 +126,12 @@ void updateData(telem_t *t, uint32_t time, float ias, float alt, eng_data_t eng_
     (*t).data.rssi = rssi;
     (*t).data.batMilliVolts = batMilliVolts;
     (*t).data.loadCellReading = loadCellReading;
+    (*t).data.thrust = thrust;
     (*t).data.fuel_pct = fuel_pct;
 }
 
 void printDataToString(char *out, telem_t t) {
-    sprintf(out, "%lu,%s,%s,%lu,%u,%s,%s,%u,%s,%s,%s,%u,%lu,%s,%i",
+    sprintf(out, "%lu,%s,%s,%lu,%u,%s,%s,%u,%s,%s,%s,%u,%lu,%s,%s,%i",
             t.data.time,
             String(t.data.ias).c_str(),
             String(t.data.alt).c_str(),
@@ -132,5 +145,6 @@ void printDataToString(char *out, telem_t t) {
             String(t.data.rssi).c_str(),
             t.data.batMilliVolts,
             String(t.data.loadCellReading).c_str(),
+            String(t.data.thrust).c_str(),
             t.data.fuel_pct);
 }
