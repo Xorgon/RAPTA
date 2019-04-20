@@ -59,7 +59,7 @@ class TelemGUIApp(QtWidgets.QMainWindow, TelemGUI.Ui_MainWindow):
             self.statusbar.showMessage("Serial port is not open")
             return
         self.total_packets += 1
-        packet = self.ser.read(77)  # 74 + 3 start chars
+        packet = self.ser.read(81)  # 78 + 3 start chars
         self.dump_file.write(packet + "\n")
         if packet[0:3] == "\xC7\xC7\xC7":
             self.millis, \
@@ -75,7 +75,7 @@ class TelemGUIApp(QtWidgets.QMainWindow, TelemGUI.Ui_MainWindow):
             self.rssi, \
             self.px_bat_voltage, \
             self.load_cell, \
-            self.fuel_pct = struct.unpack('LffLHffBf32sfHfb', packet[3:])
+            self.fuel_pct = struct.unpack('LffLHffBf32sfHffb', packet[3:])
 
             self.set_display_nums()
             self.statusbar.showMessage("Packet received successfully")
