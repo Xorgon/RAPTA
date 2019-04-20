@@ -14,6 +14,8 @@ def plot_two_scale(x_label, x1, y1, y1_label, x2, y2, y2_label, match_zero=False
     if match_zero:
         align_yaxis(ax1, 0, ax2, 0)
 
+    return fig, ax1, ax2
+
 
 def align_yaxis(ax1, v1, ax2, v2):
     """
