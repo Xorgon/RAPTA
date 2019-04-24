@@ -13,7 +13,7 @@
 #define LOAD_CELL_CLK  12
 #define LOAD_CELL_QUOTIENT 219371.22
 #define AOA_QUOTIENT 1.3298
-#define TELEM_INTERVAL 1000
+#define TELEM_INTERVAL 750
 #define FUEL_SENSOR 35
 
 #define AIRCRAFT_MASS 8.1
@@ -53,10 +53,11 @@ long last_sent_time;
 
 void setup() {
     Serial.begin(57600);
+    Serial.println(sizeof(telem_t));
     ecu = ECU(Serial1);
     pixhawk = PXComms(Serial2);
     aoaSensor = MagEncoder(4, 7, 8);
-    loadCell = HX711(LOAD_CELL_DOUT, LOAD_CELL_CLK);
+    loadCell.begin(LOAD_CELL_DOUT, LOAD_CELL_CLK);
     while (!loadCell.is_ready()) {
         Serial.println(F("Waiting for load cell..."));
     }
@@ -85,7 +86,7 @@ void loop() {
     float aoa = aoaSensor.getAngle() / AOA_QUOTIENT;
 
     // Drag calculation
-    float pitch = pixhaw.get_pitch();
+    float pitch = pixhawk.get_pitch();
     float drag = (loadCellReading + ENGINE_MASS * sin(pitch)) * 9.81 * cos(aoa)
                  - AIRCRAFT_MASS * 9.81 * sin(pitch - aoa)
                  - AIRCRAFT_MASS * (pixhawk.get_acc_x() * cos(aoa) + pixhawk.get_acc_z() * sin(aoa));
@@ -101,7 +102,8 @@ void loop() {
                100 * (analogRead(rssiPin) * 4.8 / 3.3) / 1024,  // RSSI
                pixhawk.get_battery_mv(),
                loadCellReading,
-               fuel_pct);
+               loadCellReading * 9.81,
+               fuel_pct);                       
 
     // Log to file
     printDataToString(output, telem_data);
@@ -109,7 +111,7 @@ void loop() {
 
     // Send over telemetry
     if (millis() - last_sent_time > TELEM_INTERVAL) {
-        Serial.write('\xC7\xC7\xC7');
+        Serial.write("\xC7\xC7\xC7");
         Serial.write(telem_data.s, sizeof(telem_t));
         last_sent_time = millis();
     }

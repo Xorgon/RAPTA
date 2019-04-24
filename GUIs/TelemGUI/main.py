@@ -59,9 +59,17 @@ class TelemGUIApp(QtWidgets.QMainWindow, TelemGUI.Ui_MainWindow):
             self.statusbar.showMessage("Serial port is not open")
             return
         self.total_packets += 1
-        packet = self.ser.read(81)  # 78 + 3 start chars
-        self.dump_file.write(packet + "\n")
-        if packet[0:3] == "\xC7\xC7\xC7":
+        sync_bytes = 0
+        this_byte = None
+        print("Reading packet...")
+        while this_byte is None or this_byte != b'\xC7':
+            this_byte = self.ser.read(1)
+        while this_byte == b'\xC7':
+            sync_bytes += 1
+            this_byte = self.ser.read(1)
+        packet = this_byte + self.ser.read(77)  # 78
+        self.dump_file.write(str(packet) + "\n")
+        if sync_bytes == 3:
             self.millis, \
             self.ias, \
             self.alt, \
@@ -75,7 +83,8 @@ class TelemGUIApp(QtWidgets.QMainWindow, TelemGUI.Ui_MainWindow):
             self.rssi, \
             self.px_bat_voltage, \
             self.load_cell, \
-            self.fuel_pct = struct.unpack('LffLHffBf32sfHffb', packet[3:])
+            self.fuel_pct, \
+            self.fuel_pct = struct.unpack('=LffLHffBf32sfHffb', packet)
 
             self.set_display_nums()
             self.statusbar.showMessage("Packet received successfully")
@@ -89,8 +98,13 @@ class TelemGUIApp(QtWidgets.QMainWindow, TelemGUI.Ui_MainWindow):
                 print(delta_diff)  # TODO: Put in GUI
         else:
             self.bad_packets += 1
-            bad_packet_msg = "Received bad packet"
+            bad_packet_msg = "Received bad packet (" + str(self.bad_packets) + "," + str(sync_bytes) + ")"
             self.statusbar.showMessage(bad_packet_msg)
+            #self.ser.flush()
+            self.packet_loss_number.display("{:3.2f}".format(self.packet_loss))
+            print("--------------")
+            for b in packet:
+                print("%02X" % (b))
         self.packet_loss = 100 * self.bad_packets / self.total_packets
 
     def set_display_nums(self):
@@ -107,7 +121,7 @@ class TelemGUIApp(QtWidgets.QMainWindow, TelemGUI.Ui_MainWindow):
         self.throttle_pct_number.display(self.throttle_pct)
         self.alt_number.display(self.alt)
         self.aoa_number.display(self.aoa)
-        self.eng_status_box.setText(self.eng_status)
+        self.eng_status_box.setText(self.eng_status.decode('utf-8'))
         self.packet_loss_number.display("{:3.2f}".format(self.packet_loss))
         self.rssi_number.display(self.rssi)
         self.px_bat_voltage_number.display("{:.2f}".format(float(self.px_bat_voltage) / 1000))
