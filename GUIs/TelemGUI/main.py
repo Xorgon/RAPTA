@@ -29,6 +29,7 @@ class TelemGUIApp(QtWidgets.QMainWindow, TelemGUI.Ui_MainWindow):
     rssi = None
     px_bat_voltage = None
     load_cell = None
+    drag = None
     fuel_pct = None
     gps_sats = None
 
@@ -83,7 +84,7 @@ class TelemGUIApp(QtWidgets.QMainWindow, TelemGUI.Ui_MainWindow):
             self.rssi, \
             self.px_bat_voltage, \
             self.load_cell, \
-            self.fuel_pct, \
+            self.drag, \
             self.fuel_pct = struct.unpack('=LffLHffBf32sfHffb', packet)
 
             self.set_display_nums()
@@ -100,7 +101,7 @@ class TelemGUIApp(QtWidgets.QMainWindow, TelemGUI.Ui_MainWindow):
             self.bad_packets += 1
             bad_packet_msg = "Received bad packet (" + str(self.bad_packets) + "," + str(sync_bytes) + ")"
             self.statusbar.showMessage(bad_packet_msg)
-            #self.ser.flush()
+            # self.ser.flush()
             self.packet_loss_number.display("{:3.2f}".format(self.packet_loss))
             print("--------------")
             for b in packet:
@@ -126,6 +127,7 @@ class TelemGUIApp(QtWidgets.QMainWindow, TelemGUI.Ui_MainWindow):
         self.rssi_number.display(self.rssi)
         self.px_bat_voltage_number.display("{:.2f}".format(float(self.px_bat_voltage) / 1000))
         self.load_cell_number.display(self.load_cell)
+        self.drag_number.display(self.drag)
         self.fuel_pct_number.display(abs(self.fuel_pct))
         if self.fuel_pct > 0:
             self.fuel_pct_number.setStyleSheet("background-color: #aaffaa")

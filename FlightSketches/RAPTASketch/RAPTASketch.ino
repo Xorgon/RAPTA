@@ -30,7 +30,7 @@ typedef union {
         float rssi;
         uint16_t batMilliVolts;
         float loadCellReading;
-        float thrust;
+        float drag;
         int8_t fuel_pct; // 78
     } data;
     char s[sizeof(data)];
@@ -102,7 +102,7 @@ void loop() {
                100 * (analogRead(rssiPin) * 4.8 / 3.3) / 1024,  // RSSI
                pixhawk.get_battery_mv(),
                loadCellReading,
-               loadCellReading * 9.81,
+               drag,
                fuel_pct);                       
 
     // Log to file
@@ -118,7 +118,7 @@ void loop() {
 }
 
 void updateData(telem_t *t, uint32_t time, float ias, float alt, eng_data_t eng_data, float aoa, char eng_status[32],
-                float rssi, uint16_t batMilliVolts, float loadCellReading, float thrust, int8_t fuel_pct) {
+                float rssi, uint16_t batMilliVolts, float loadCellReading, float drag, int8_t fuel_pct) {
     (*t).data.time = time;
     (*t).data.ias = ias;
     (*t).data.alt = alt;
@@ -128,7 +128,7 @@ void updateData(telem_t *t, uint32_t time, float ias, float alt, eng_data_t eng_
     (*t).data.rssi = rssi;
     (*t).data.batMilliVolts = batMilliVolts;
     (*t).data.loadCellReading = loadCellReading;
-    (*t).data.thrust = thrust;
+    (*t).data.drag = drag;
     (*t).data.fuel_pct = fuel_pct;
 }
 
