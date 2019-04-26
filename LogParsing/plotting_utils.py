@@ -1,8 +1,11 @@
 import matplotlib.pyplot as plt
 
 
-def plot_two_scale(x_label, x1, y1, y1_label, x2, y2, y2_label, match_zero=False):
-    fig, ax1 = plt.subplots()
+def plot_two_scale(x_label, x1, y1, y1_label, x2, y2, y2_label, match_zero=False, title=None):
+    if title:
+        fig, ax1 = plt.subplots(num=title)
+    else:
+        fig, ax1 = plt.subplots()
 
     ax1.set_xlabel(x_label)
     ax1.set_ylabel(y1_label, color="b")
