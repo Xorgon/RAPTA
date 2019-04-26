@@ -26,12 +26,13 @@ typedef union {
         float alt;
         eng_data_t eng_data;
         float aoa;
+        float pitch;
         char eng_status[32];
         float rssi;
         uint16_t batMilliVolts;
         float loadCellReading;
         float drag;
-        int8_t fuel_pct; // 78
+        int8_t fuel_pct; // 82
     } data;
     char s[sizeof(data)];
 } telem_t;
@@ -98,12 +99,13 @@ void loop() {
                pixhawk.get_altitude(),
                ecu.data,
                aoa,
+               pitch,
                ecu.status.c_str(),
                100 * (analogRead(rssiPin) * 4.8 / 3.3) / 1024,  // RSSI
                pixhawk.get_battery_mv(),
                loadCellReading,
                drag,
-               fuel_pct);                       
+               fuel_pct);
 
     // Log to file
     printDataToString(output, telem_data);
@@ -117,13 +119,15 @@ void loop() {
     }
 }
 
-void updateData(telem_t *t, uint32_t time, float ias, float alt, eng_data_t eng_data, float aoa, char eng_status[32],
-                float rssi, uint16_t batMilliVolts, float loadCellReading, float drag, int8_t fuel_pct) {
+void updateData(telem_t *t, uint32_t time, float ias, float alt, eng_data_t eng_data, float aoa, float pitch,
+                char eng_status[32], float rssi, uint16_t batMilliVolts, float loadCellReading, float drag,
+                int8_t fuel_pct) {
     (*t).data.time = time;
     (*t).data.ias = ias;
     (*t).data.alt = alt;
     (*t).data.eng_data = eng_data;
     (*t).data.aoa = aoa;
+    (*t).data.pitch = pitch;
     strcpy((*t).data.eng_status, eng_status);
     (*t).data.rssi = rssi;
     (*t).data.batMilliVolts = batMilliVolts;
@@ -133,7 +137,7 @@ void updateData(telem_t *t, uint32_t time, float ias, float alt, eng_data_t eng_
 }
 
 void printDataToString(char *out, telem_t t) {
-    sprintf(out, "%lu,%s,%s,%lu,%u,%s,%s,%u,%s,%s,%s,%u,%lu,%s,%s,%i",
+    sprintf(out, "%lu,%s,%s,%lu,%u,%s,%s,%u,%s,%s,%s,%s,%u,%lu,%s,%s,%i",
             t.data.time,
             String(t.data.ias).c_str(),
             String(t.data.alt).c_str(),
@@ -143,6 +147,7 @@ void printDataToString(char *out, telem_t t) {
             String(t.data.eng_data.batVoltage).c_str(),
             t.data.eng_data.throttlePct,
             String(t.data.aoa).c_str(),
+            String(t.data.pitch).c_str(),
             t.data.eng_status,
             String(t.data.rssi).c_str(),
             t.data.batMilliVolts,

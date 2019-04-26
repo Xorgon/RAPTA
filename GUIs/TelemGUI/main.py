@@ -25,6 +25,7 @@ class TelemGUIApp(QtWidgets.QMainWindow, TelemGUI.Ui_MainWindow):
     eng_bat_voltage = None
     throttle_pct = None
     aoa = None
+    pitch = None
     eng_status = None
     rssi = None
     px_bat_voltage = None
@@ -68,7 +69,7 @@ class TelemGUIApp(QtWidgets.QMainWindow, TelemGUI.Ui_MainWindow):
         while this_byte == b'\xC7':
             sync_bytes += 1
             this_byte = self.ser.read(1)
-        packet = this_byte + self.ser.read(77)  # 78
+        packet = this_byte + self.ser.read(81)  # 82
         self.dump_file.write(str(packet) + "\n")
         if sync_bytes == 3:
             self.millis, \
@@ -80,12 +81,13 @@ class TelemGUIApp(QtWidgets.QMainWindow, TelemGUI.Ui_MainWindow):
             self.eng_bat_voltage, \
             self.throttle_pct, \
             self.aoa, \
+            self.pitch, \
             self.eng_status, \
             self.rssi, \
             self.px_bat_voltage, \
             self.load_cell, \
             self.drag, \
-            self.fuel_pct = struct.unpack('=LffLHffBf32sfHffb', packet)
+            self.fuel_pct = struct.unpack('=LffLHffBff32sfHffb', packet)
 
             self.set_display_nums()
             self.statusbar.showMessage("Packet received successfully")
@@ -96,7 +98,7 @@ class TelemGUIApp(QtWidgets.QMainWindow, TelemGUI.Ui_MainWindow):
                 remote_delta = float(self.millis) / 1000 - self.init_remote_time
                 local_delta = (datetime.datetime.now() - self.init_local_time).total_seconds()
                 delta_diff = remote_delta - local_delta
-                print(delta_diff)  # TODO: Put in GUI
+                print(delta_diff)
         else:
             self.bad_packets += 1
             bad_packet_msg = "Received bad packet (" + str(self.bad_packets) + "," + str(sync_bytes) + ")"
@@ -122,6 +124,7 @@ class TelemGUIApp(QtWidgets.QMainWindow, TelemGUI.Ui_MainWindow):
         self.throttle_pct_number.display(self.throttle_pct)
         self.alt_number.display(self.alt)
         self.aoa_number.display(self.aoa)
+        self.pitch_number.display(self.pitch)
         self.eng_status_box.setText(self.eng_status.decode('utf-8'))
         self.packet_loss_number.display("{:3.2f}".format(self.packet_loss))
         self.rssi_number.display(self.rssi)
