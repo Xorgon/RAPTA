@@ -152,6 +152,6 @@ void printDataToString(char *out, telem_t t) {
             String(t.data.rssi).c_str(),
             t.data.batMilliVolts,
             String(t.data.loadCellReading).c_str(),
-            String(t.data.thrust).c_str(),
+            String(t.data.drag).c_str(),
             t.data.fuel_pct);
 }
