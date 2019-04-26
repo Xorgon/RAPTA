@@ -129,7 +129,7 @@ void ECU::receiveResponse(ecu_response_t *response) {
     } else if (strcmp(response->cmd, "RSD") == 0) {
         readMessage(response);
         bool ended = false;
-        for (int i = 0; i < MAX_RESPONSE_LENGTH; i++) {
+        for (int i = 0; i < 32; i++) {
             if (ended) {
                 status[i] = ' ';
             } else if ((response->response)[i] == '\0') {

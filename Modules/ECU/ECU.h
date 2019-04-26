@@ -57,7 +57,7 @@ public:
 
     eng_data_t data;
 
-    String status;
+    char status[32];
 
 private:
     Stream *ecuSerial;
