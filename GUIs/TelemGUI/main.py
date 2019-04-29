@@ -125,7 +125,7 @@ class TelemGUIApp(QtWidgets.QMainWindow, TelemGUI.Ui_MainWindow):
         self.throttle_pct_number.display(self.throttle_pct)
         self.alt_number.display(self.alt)
         self.aoa_number.display(self.aoa)
-        self.pitch_number.display(math.radians(self.pitch))
+        self.pitch_number.display(math.degrees(self.pitch))
         self.eng_status_box.setText(self.eng_status.decode('utf-8'))
         self.packet_loss_number.display("{:3.2f}".format(self.packet_loss))
         self.rssi_number.display(self.rssi)
