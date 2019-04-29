@@ -16,7 +16,9 @@
 #define TELEM_INTERVAL 750
 #define FUEL_SENSOR 35
 
-#define AIRCRAFT_MASS 8.1
+#define DRY_AIRCRAFT_MASS 7.5
+#define AVG_FUEL_MASS 0.91125
+#define AIRCRAFT_MASS DRY_AIRCRAFT_MASS + AVG_FUEL_MASS
 #define ENGINE_MASS 1
 
 typedef union {
@@ -89,7 +91,6 @@ void loop() {
     // Drag calculation
     float pitch = pixhawk.get_pitch();
     float drag = (loadCellReading + ENGINE_MASS * sin(pitch)) * 9.81 * cos(aoa)
-                 - AIRCRAFT_MASS * 9.81 * sin(pitch - aoa)
                  - AIRCRAFT_MASS * (pixhawk.get_acc_x() * cos(aoa) + pixhawk.get_acc_z() * sin(aoa));
 
     // Store new data in telem_data
@@ -103,7 +104,7 @@ void loop() {
                ecu.status.c_str(),
                100 * (analogRead(rssiPin) * 4.8 / 3.3) / 1024,  // RSSI
                pixhawk.get_battery_mv(),
-               loadCellReading,
+               loadCellReading + ENGINE_MASS * sin(pitch),
                drag,
                fuel_pct);
 

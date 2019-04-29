@@ -87,8 +87,7 @@ engine_mass = 0.471
 aircraft_mass = 7
 acc = synced_x_acc * np.cos(synced_aoa) + (synced_z_acc - synced_rot_acc * 0.315) * np.sin(synced_aoa)
 drag_data = (synced_thrust + engine_mass * (9.81 * np.sin(synced_pitch) + acc)) * np.cos(synced_aoa) \
-            - aircraft_mass * acc \
-            - aircraft_mass * 9.81 * np.sin(synced_pitch - synced_aoa)
+            - aircraft_mass * acc
 
 filt_drag_times, filt_drag = zip(*filter(lambda x: 216.5 <= x[0] <= 219, zip(synced_times, drag_data)))
 print("Mean drag between 216.5s and 219s:", np.mean(filt_drag))
@@ -142,7 +141,7 @@ plt.ylabel("pitch - aoa")
 
 plot_two_scale("Time (s)",
                pitch_times, pitch_data, "Pitch (degrees)",
-               z_acc_times, z_acc_data, "z acc",
+               z_acc_times, np.array(z_acc_data) / 9.81, "z acc",
                title="Pitch/z acc")
 
 fig, _, _ = plot_two_scale("Time (s)",
