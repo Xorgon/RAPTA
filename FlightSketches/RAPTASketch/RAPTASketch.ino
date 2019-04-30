@@ -16,10 +16,10 @@
 #define TELEM_INTERVAL 750
 #define FUEL_SENSOR 35
 
-#define DRY_AIRCRAFT_MASS 7.5
+#define DRY_AIRCRAFT_MASS 7.955
 #define AVG_FUEL_MASS 0.91125
 #define AIRCRAFT_MASS DRY_AIRCRAFT_MASS + AVG_FUEL_MASS
-#define ENGINE_MASS 1
+#define ENGINE_MASS 1.10392
 
 typedef union {
     struct {
