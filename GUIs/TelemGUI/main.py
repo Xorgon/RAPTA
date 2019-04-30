@@ -67,6 +67,11 @@ class TelemGUIApp(QtWidgets.QMainWindow, TelemGUI.Ui_MainWindow):
         print("Reading packet...")
         while this_byte is None or this_byte != b'\xC7':
             this_byte = self.ser.read(1)
+            try:
+                print(this_byte.decode('utf-8'), end='')
+            except UnicodeDecodeError:
+                print(this_byte)
+        print("Reading sync bytes...")
         while this_byte == b'\xC7':
             sync_bytes += 1
             this_byte = self.ser.read(1)
