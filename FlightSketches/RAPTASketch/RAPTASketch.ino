@@ -138,7 +138,7 @@ void updateData(telem_t *t, uint32_t time, float ias, float alt, eng_data_t eng_
 }
 
 void printDataToString(char *out, telem_t t) {
-    sprintf(out, "%lu,%s,%s,%lu,%u,%s,%s,%u,%s,%s,%s,%s,%u,%lu,%s,%s,%i",
+    sprintf(out, "%lu,%s,%s,%lu,%u,%s,%s,%u,%s,%s,%s,%s,%u,%s,%s,%i",
             t.data.time,
             String(t.data.ias).c_str(),
             String(t.data.alt).c_str(),
