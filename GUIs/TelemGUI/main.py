@@ -75,7 +75,7 @@ class TelemGUIApp(QtWidgets.QMainWindow, TelemGUI.Ui_MainWindow):
         while this_byte == b'\xC7':
             sync_bytes += 1
             this_byte = self.ser.read(1)
-        packet = this_byte + self.ser.read(81)  # 82
+        packet = this_byte + self.ser.read(82)  # 83
         self.dump_file.write(str(packet) + "\n")
         if sync_bytes == 3:
             self.millis, \
@@ -93,7 +93,7 @@ class TelemGUIApp(QtWidgets.QMainWindow, TelemGUI.Ui_MainWindow):
             self.px_bat_voltage, \
             self.load_cell, \
             self.drag, \
-            self.fuel_pct = struct.unpack('=LffLHffBff32sfHffb', packet)
+            self.fuel_pct = struct.unpack('=LffLHffBff33sfHffb', packet)
 
             self.set_display_nums()
             self.statusbar.showMessage("Packet received successfully")

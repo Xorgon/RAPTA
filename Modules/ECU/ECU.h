@@ -44,11 +44,6 @@ public:
     void updateData();
 
     /**
-     * Updates engine status. Relies on delays so use for testing only.
-     */
-    void updateStatus();
-
-    /**
      * Updates engine data and status. Use this for most applications.
      */
     void updateAll();
@@ -57,7 +52,7 @@ public:
 
     eng_data_t data;
 
-    char status[32];
+    char status[33];
 
 private:
     Stream *ecuSerial;

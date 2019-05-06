@@ -22,10 +22,6 @@ void ECU::updateData() {
     readCurrentValues(&resp);
 }
 
-void ECU::updateStatus() {
-    status = getData("RSD");
-}
-
 void ECU::updateAll() {
     unsigned long now = millis();
     if (now - last_cmd_millis > CMD_DELAY) {
@@ -102,7 +98,9 @@ void ECU::readMessage(ecu_response_t *response) {
         charsRead++;
         received = ecuSerial->read();
     }
-    response->response[charsRead] = '\0';
+    for (int i = charsRead; i < MAX_RESPONSE_LENGTH; i++) {
+        response->response[i] = ' ';
+    }
     return response;
 }
 
@@ -130,15 +128,9 @@ void ECU::receiveResponse(ecu_response_t *response) {
         readMessage(response);
         bool ended = false;
         for (int i = 0; i < 32; i++) {
-            if (ended) {
-                status[i] = ' ';
-            } else if ((response->response)[i] == '\0') {
-                ended = true;
-                status[i] = ' ';
-            } else {
-                status[i] = (response->response)[i];
-            }
+            status[i] = (response->response)[i];
         }
+        status[32] = '\0';
     } else {
         readMessage(response);
     }

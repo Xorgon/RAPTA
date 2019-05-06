@@ -29,12 +29,12 @@ typedef union {
         eng_data_t eng_data;
         float aoa;
         float pitch;
-        char eng_status[32];
+        char eng_status[33];
         float rssi;
         uint16_t batMilliVolts;
         float loadCellReading;
         float drag;
-        int8_t fuel_pct; // 82
+        int8_t fuel_pct; // 83
     } data;
     char s[sizeof(data)];
 } telem_t;
@@ -101,7 +101,7 @@ void loop() {
                ecu.data,
                aoa,
                pitch,
-               ecu.status.c_str(),
+               ecu.status,
                100 * (analogRead(rssiPin) * 4.8 / 3.3) / 1024,  // RSSI
                pixhawk.get_battery_mv(),
                loadCellReading + ENGINE_MASS * sin(pitch),
@@ -121,7 +121,7 @@ void loop() {
 }
 
 void updateData(telem_t *t, uint32_t time, float ias, float alt, eng_data_t eng_data, float aoa, float pitch,
-                char eng_status[32], float rssi, uint16_t batMilliVolts, float loadCellReading, float drag,
+                char* eng_status, float rssi, uint16_t batMilliVolts, float loadCellReading, float drag,
                 int8_t fuel_pct) {
     (*t).data.time = time;
     (*t).data.ias = ias;
